@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquitectura Basada en Microservicios</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --blue:#2563eb;
+      --blue2:#0ea5e9;
+      --green:#16a34a;
+      --orange:#f97316;
+      --red:#dc2626;
+      --card:#ffffff;
+      --soft:#eff6ff;
+      --soft2:#f8fafc;
+      --line:#bfdbfe;
+      --text:#0f172a;
+      --muted:#475569;
+      --dark:#111827;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg,#eaf2ff 0%, #f8fafc 100%);
+      color:var(--text);
+      line-height:1.45;
+    }
+    header{
+      background:linear-gradient(135deg,#0f172a,#1e3a8a);
+      color:white;
+      padding:38px 26px;
+    }
+    .container{max-width:1260px;margin:0 auto}
+    .hero{
+      display:grid;
+      grid-template-columns:1.25fr .9fr;
+      gap:28px;
+      align-items:center;
+    }
+    h1{font-size:2.45rem;margin:0 0 12px}
+    header p{color:#dbeafe;font-size:1.05rem;margin:0}
+    .hero-card{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:20px;
+      padding:22px;
+      box-shadow:0 10px 32px rgba(0,0,0,.18);
+    }
+    .hero-card h3{margin:0 0 10px}
+    nav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid #dbeafe;
+    }
+    .nav-inner{
+      max-width:1260px;
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:12px 16px;
+    }
+    nav a{
+      text-decoration:none;
+      color:#0f172a;
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:.9rem;
+      font-weight:600;
+    }
+    main{max-width:1260px;margin:28px auto;padding:0 18px}
+    section{
+      margin-bottom:34px;
+      background:rgba(255,255,255,.45);
+      border-radius:24px;
+      padding:4px 0;
+    }
+    .section-title{
+      font-size:1.72rem;
+      margin:0 0 16px;
+      color:#0f172a;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:18px;
+    }
+    .card{
+      background:white;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 8px 30px rgba(15,23,42,.06);
+      grid-column:span 12;
+    }
+    .half{grid-column:span 6}
+    .third{grid-column:span 4}
+    .quarter{grid-column:span 3}
+    .two-thirds{grid-column:span 8}
+    .badge{
+      display:inline-block;
+      background:#dbeafe;
+      color:#1d4ed8;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:.78rem;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+    .diagram{
+      background:#0b1220;
+      color:white;
+      border-radius:20px;
+      padding:22px;
+      min-height:290px;
+    }
+    .stack{display:flex;flex-direction:column;gap:12px;max-width:440px;margin:0 auto}
+    .box{
+      background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+      border-radius:14px;
+      padding:14px;
+      text-align:center;
+      font-weight:700;
+      box-shadow:0 7px 18px rgba(14,165,233,.24);
+    }
+    .box.green{background:linear-gradient(135deg,#15803d,#22c55e)}
+    .box.orange{background:linear-gradient(135deg,#c2410c,#fb923c)}
+    .box.gray{background:linear-gradient(135deg,#334155,#64748b)}
+    .arrow{text-align:center;font-size:1.5rem;color:#93c5fd}
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(9,1fr);
+      gap:8px;
+      align-items:center;
+      text-align:center;
+      font-weight:700;
+    }
+    .flow .step{
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:14px;
+      padding:14px 8px;
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .flow .arr{font-size:1.35rem;color:#2563eb}
+    .code{
+      background:#0f172a;
+      color:#e2e8f0;
+      border-radius:14px;
+      padding:16px;
+      overflow:auto;
+      font-family:Consolas, Monaco, monospace;
+      font-size:.9rem;
+      white-space:pre-wrap;
+      margin:10px 0;
+    }
+    .layer{
+      border-left:6px solid #2563eb;
+      background:#f8fbff;
+      border-radius:14px;
+      padding:14px 16px;
+      margin-bottom:12px;
+    }
+    .layer h4{margin:0 0 6px}
+    ul{padding-left:22px}
+    .pros li::marker{color:#16a34a}
+    .cons li::marker{color:#dc2626}
+    table{width:100%;border-collapse:collapse;background:white}
+    th,td{border:1px solid #dbeafe;padding:12px;text-align:left;vertical-align:top}
+    th{background:#eff6ff;color:#1e3a8a}
+    .table-wrap{overflow:auto}
+    .slide-note{
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-left:6px solid #f97316;
+      padding:14px 16px;
+      border-radius:14px;
+      margin-top:12px;
+    }
+    .file-block{
+      border:1px solid #dbeafe;
+      background:#f8fafc;
+      border-radius:18px;
+      padding:18px;
+      margin-bottom:18px;
+    }
+    .file-block h3{margin:0 0 10px;color:#1e3a8a}
+    .footer{text-align:center;color:#64748b;padding:26px;font-size:.9rem}
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .half,.third,.quarter,.two-thirds{grid-column:span 12}
+      .flow{grid-template-columns:1fr}
+      .flow .arr{transform:rotate(90deg)}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container hero">
+    <div>
+      <h1>Arquitectura Basada en Microservicios</h1>
+      <p>
+        El objetivo de este documento WEB explicar qué es una arquitectura basada en microservicios, cómo se organiza,
+        cómo fluye una petición, cómo se comunica entre servicios, cómo se maneja Git y cómo se implementa con ejemplos en Java.
+      </p>
+    </div>
+    <div class="hero-card">
+      <h3>Concepto clave</h3>
+      <p>
+        Microservicios no significa “partir una aplicación en pedazos porque sí”.
+        Significa dividir un sistema por capacidades de negocio, con servicios autónomos,
+        desplegables de forma independiente y preparados para escalar, fallar y evolucionar de manera controlada.
+      </p>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#concepto">Concepto</a>
+    <a href="#componentes">Componentes</a>
+    <a href="#ventajas">Ventajas/Riesgos</a>
+    <a href="#flujo">Flujo</a>
+    <a href="#infra">Infraestructura</a>
+    <a href="#git">Git</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-industria">Ejemplo industria</a>
+    <a href="#java">Java</a><a href="#micro-capas">Microservicios por capas</a>
+    <a href="#testing">Testing</a>
+    <a href="#no-usar">Cuándo no usar</a>
+    
+  </div>
+</nav>
+
+<main>
+
+<section id="concepto">
+  <h2 class="section-title">1. ¿Qué es una arquitectura basada en microservicios?</h2>
+  <div class="grid">
+    <div class="card two-thirds">
+      <span class="badge">Definición</span>
+      <p>
+        Una arquitectura basada en microservicios es un estilo arquitectónico donde una aplicación se divide
+        en varios servicios pequeños, autónomos y desplegables de forma independiente. Cada servicio representa
+        una capacidad de negocio concreta, por ejemplo: pedidos, inventario, facturación, usuarios o notificaciones.
+      </p>
+      <ul>
+        <li>Cada microservicio tiene una responsabilidad clara.</li>
+        <li>Cada servicio puede tener su propia base de datos.</li>
+        <li>Los servicios se comunican mediante REST, gRPC, mensajería o eventos.</li>
+        <li>Cada microservicio puede desplegarse, escalarse y mantenerse de forma independiente.</li>
+        <li>Requiere disciplina técnica: observabilidad, pruebas, automatización y manejo de fallos.</li>
+      </ul>
+    </div>
+    <div class="card half diagram">
+      <span class="badge" style="background:#1e40af;color:white;">Vista conceptual</span>
+      <div class="stack">
+        <div class="box">Cliente / Frontend</div>
+        <div class="arrow">↓</div>
+        <div class="box green">API Gateway</div>
+        <div class="arrow">↓</div>
+        <div class="box orange">Order / Inventory / Billing</div>
+        <div class="arrow">↓</div>
+        <div class="box gray">Base de datos por servicio</div>
+      </div>
+    </div>
+  </div>
+
+  
+</section>
+
+<section id="ejemplo-industria">
+  <h2 class="section-title">8. Ejemplo 2: e-commerce</h2>
+  <div class="grid">
+    <div class="card">
+      <span class="badge">Escenario realista</span>
+      <p>
+        Una plataforma de comercio electrónico con miles de usuarios necesita escalar pedidos, inventario,
+        pagos, usuarios, envíos, promociones y notificaciones de forma independiente.
+      </p>
+    </div>
+    <div class="card third"><span class="badge">Order Service</span><p>Crea pedidos, valida reglas de compra y coordina el flujo principal.</p></div>
+    <div class="card third"><span class="badge">Inventory Service</span><p>Reserva stock y evita sobreventa cuando hay alta concurrencia.</p></div>
+    <div class="card third"><span class="badge">Billing Service</span><p>Gestiona facturación, impuestos, pagos y comprobantes.</p></div>
+    <div class="card third"><span class="badge">User Service</span><p>Administra usuarios, perfiles, direcciones y preferencias.</p></div>
+    <div class="card third"><span class="badge">Shipping Service</span><p>Calcula envío, guía, transportadora y estado logístico.</p></div>
+    <div class="card third"><span class="badge">Notification Service</span><p>Envía correo, SMS, WhatsApp o push notification.</p></div>
+  </div>
+</section>
+
+<section id="ejemplo-banca">
+  <h2 class="section-title">9. Ejemplo 3: banca digital</h2>
+  <div class="grid">
+    <div class="card half">
+      <span class="badge">Caso</span>
+      <p>
+        Un cliente realiza una transferencia desde una app bancaria. La transacción debe validar saldo,
+        riesgo de fraude, límites, cuenta destino y notificar el resultado.
+      </p>
+      <ul>
+        <li><strong>Transaction Service:</strong> registra y coordina la transacción.</li>
+        <li><strong>Fraud Service:</strong> evalúa riesgo.</li>
+        <li><strong>Account Service:</strong> valida saldo y actualiza cuentas.</li>
+        <li><strong>Notification Service:</strong> informa resultado al cliente.</li>
+      </ul>
+    </div>
+    <div class="card half">
+      <span class="badge">Flujo</span>
+      <div class="code">Cliente
+→ API Gateway
+→ Transaction Service
+→ Fraud Service
+→ Account Service
+→ Notification Service
+→ Response</div>
+      <p>
+        Este ejemplo permite enseñar resiliencia, idempotencia, transacciones distribuidas,
+        compensaciones y monitoreo de procesos críticos.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="java">
+  <h2 class="section-title">10. Ejemplo Java</h2>
+
+  <div class="file-block">
+    <h3>OrderController.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── order-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── orders/
+                            └── controller/
+                                └── OrderController.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Recibe la petición HTTP desde el API Gateway.</li>
+      <li>Convierte el JSON de entrada en DTO.</li>
+      <li>No debe contener reglas de negocio complejas.</li>
+      <li>En el flujo pertenece al bloque <strong>Controller</strong>.</li>
+    </ul>
+    <div class="code">@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity&lt;OrderResponse&gt; create(@RequestBody CreateOrderRequest request) {
+        return ResponseEntity.ok(orderService.createOrder(request));
+    }
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>OrderService.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── order-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── orders/
+                            └── application/
+                                └── OrderService.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Contiene el caso de uso principal: crear pedido.</li>
+      <li>Valida reglas de negocio propias del pedido.</li>
+      <li>Coordina comunicación con Inventory Service.</li>
+      <li>En el flujo pertenece al bloque <strong>Service / Application</strong>.</li>
+    </ul>
+    <div class="code">@Service
+public class OrderService {
+
+    private final InventoryClient inventoryClient;
+    private final OrderRepository orderRepository;
+
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        inventoryClient.reserveStock(request.productId(), request.quantity());
+
+        Order order = new Order(request.customerId(), request.productId(), request.quantity());
+        orderRepository.save(order);
+
+        return new OrderResponse(order.getId(), "ORDER_CREATED");
+    }
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>InventoryClient.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── order-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── orders/
+                            └── infrastructure/
+                                └── client/
+                                    └── InventoryClient.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Permite que Order Service se comunique con Inventory Service.</li>
+      <li>Encapsula la llamada HTTP para no mezclar infraestructura con negocio.</li>
+      <li>Debe manejar timeouts, errores y reintentos.</li>
+      <li>En el flujo pertenece al bloque <strong>Client / Integration</strong>.</li>
+    </ul>
+    <div class="code">@FeignClient(name = "inventory-service")
+public interface InventoryClient {
+
+    @PostMapping("/inventory/reserve")
+    void reserveStock(@RequestParam Long productId,
+                      @RequestParam Integer quantity);
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>OrderRepository.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── order-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── orders/
+                            └── infrastructure/
+                                └── persistence/
+                                    └── OrderRepository.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Administra persistencia de pedidos.</li>
+      <li>No debe acceder a datos de otros microservicios.</li>
+      <li>Cada servicio administra sus propios datos.</li>
+      <li>En el flujo pertenece al bloque <strong>Persistence</strong>.</li>
+    </ul>
+    <div class="code">public interface OrderRepository extends JpaRepository&lt;Order, Long&gt; {
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>application.yml</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── order-service/
+    └── src/
+        └── main/
+            └── resources/
+                └── application.yml</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Configura nombre del servicio, puerto, base de datos y discovery.</li>
+      <li>Permite que el servicio se registre o sea localizado.</li>
+      <li>En producción puede ser administrado por Config Server.</li>
+      <li>En el flujo pertenece a <strong>Infrastructure Configuration</strong>.</li>
+    </ul>
+    <div class="code">spring:
+  application:
+    name: order-service
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka</div>
+  </div>
+</section>
+
+
+<section id="micro-capas">
+  <h2 class="section-title">11. Arquitectura de microservicios aplicando capas</h2>
+
+  <div class="grid">
+    <div class="card two-thirds">
+      <span class="badge">Concepto</span>
+      <p>
+        Una arquitectura de microservicios también puede organizarse internamente por capas. 
+        Esto significa que cada microservicio es independiente, pero dentro de cada servicio se mantiene 
+        una estructura ordenada para separar responsabilidades: entrada, lógica de aplicación, dominio, infraestructura y persistencia.
+      </p>
+      <p>
+        La idea clave es que <strong>microservicios define cómo se separa el sistema completo</strong>, 
+        mientras que <strong>las capas definen cómo se organiza internamente cada microservicio</strong>.
+      </p>
+      <ul>
+        <li><strong>Controller / API:</strong> recibe peticiones HTTP.</li>
+        <li><strong>Application / Service:</strong> coordina casos de uso.</li>
+        <li><strong>Domain:</strong> contiene reglas de negocio y entidades.</li>
+        <li><strong>Infrastructure:</strong> integra base de datos, otros servicios o mensajería.</li>
+        <li><strong>Persistence:</strong> repositorios y acceso a datos propios del servicio.</li>
+      </ul>
+    </div>
+
+    <div class="card half diagram">
+      <span class="badge" style="background:#1e40af;color:white;">Microservicio por capas</span>
+      <div class="stack">
+        <div class="box">Controller / API</div>
+        <div class="arrow">↓</div>
+        <div class="box green">Application Service</div>
+        <div class="arrow">↓</div>
+        <div class="box orange">Domain Model / Rules</div>
+        <div class="arrow">↓</div>
+        <div class="box gray">Infrastructure / Persistence</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge">Estructura recomendada del microservicio por capas</span>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            ├── controller/
+                            │   └── ProductController.java
+                            ├── application/
+                            │   └── ProductService.java
+                            ├── domain/
+                            │   ├── Product.java
+                            │   └── ProductStatus.java
+                            ├── infrastructure/
+                            │   └── persistence/
+                            │       ├── ProductRepository.java
+                            │       └── ProductEntity.java
+                            └── ProductApplication.java</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="badge">Ejemplo funcional: Product Service</span>
+      <p>
+        Este ejemplo representa un microservicio encargado de administrar productos dentro de una plataforma de e-commerce.
+        El servicio permite crear productos, consultar productos y validar reglas simples del dominio, como que el precio sea mayor que cero.
+      </p>
+      <p>
+        Este microservicio podría ser consumido por otros servicios como <strong>Order Service</strong> o <strong>Inventory Service</strong>,
+        pero sus datos y reglas internas pertenecen únicamente a <strong>Product Service</strong>.
+      </p>
+    </div>
+  </div>
+
+  <div class="file-block">
+    <h3>ProductController.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            └── controller/
+                                └── ProductController.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Recibe las peticiones HTTP relacionadas con productos.</li>
+      <li>Expone endpoints como <code>POST /products</code> y <code>GET /products/{id}</code>.</li>
+      <li>No contiene reglas de negocio profundas; delega al <code>ProductService</code>.</li>
+      <li>En el flujo pertenece a la capa <strong>Controller / API</strong>.</li>
+    </ul>
+    <div class="code">@RestController
+@RequestMapping("/products")
+public class ProductController {
+
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;ProductResponse&gt; create(@RequestBody CreateProductRequest request) {
+        return ResponseEntity.ok(productService.createProduct(request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;ProductResponse&gt; findById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findById(id));
+    }
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>ProductService.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            └── application/
+                                └── ProductService.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Coordina los casos de uso del microservicio.</li>
+      <li>Valida reglas antes de persistir información.</li>
+      <li>Convierte solicitudes en objetos del dominio.</li>
+      <li>En el flujo pertenece a la capa <strong>Application / Service</strong>.</li>
+    </ul>
+    <div class="code">@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public ProductResponse createProduct(CreateProductRequest request) {
+        Product product = Product.create(request.name(), request.price());
+
+        Product saved = productRepository.save(product);
+
+        return new ProductResponse(saved.getId(), saved.getName(), saved.getPrice());
+    }
+
+    public ProductResponse findById(Long id) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        return new ProductResponse(product.getId(), product.getName(), product.getPrice());
+    }
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>Product.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            └── domain/
+                                └── Product.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Representa la entidad principal del dominio del microservicio.</li>
+      <li>Contiene reglas propias del producto.</li>
+      <li>Evita que reglas como precio inválido queden en el controller.</li>
+      <li>En el flujo pertenece a la capa <strong>Domain</strong>.</li>
+    </ul>
+    <div class="code">public class Product {
+
+    private Long id;
+    private String name;
+    private Double price;
+
+    private Product(String name, Double price) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio");
+        }
+
+        if (price == null || price &lt;= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero");
+        }
+
+        this.name = name;
+        this.price = price;
+    }
+
+    public static Product create(String name, Double price) {
+        return new Product(name, price);
+    }
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public Double getPrice() { return price; }
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>ProductRepository.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            └── infrastructure/
+                                └── persistence/
+                                    └── ProductRepository.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Administra el acceso a datos del microservicio.</li>
+      <li>Solo maneja datos propios de productos.</li>
+      <li>No debe consultar bases de datos de otros microservicios.</li>
+      <li>En el flujo pertenece a la capa <strong>Infrastructure / Persistence</strong>.</li>
+    </ul>
+    <div class="code">public interface ProductRepository {
+
+    Product save(Product product);
+
+    Optional&lt;Product&gt; findById(Long id);
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>ProductJpaRepository.java</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └── universidad/
+                        └── products/
+                            └── infrastructure/
+                                └── persistence/
+                                    └── ProductJpaRepository.java</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Implementa la persistencia usando Spring Data JPA.</li>
+      <li>Permite desacoplar el dominio de la tecnología de base de datos.</li>
+      <li>Hace parte de infraestructura, no del dominio.</li>
+      <li>En el flujo pertenece a la capa <strong>Infrastructure</strong>.</li>
+    </ul>
+    <div class="code">public interface ProductJpaRepository extends JpaRepository&lt;ProductEntity, Long&gt; {
+}</div>
+  </div>
+
+  <div class="file-block">
+    <h3>application.yml</h3>
+    <p><strong>Ubicación en Git:</strong></p>
+    <div class="code">services/
+└── product-service/
+    └── src/
+        └── main/
+            └── resources/
+                └── application.yml</div>
+    <p><strong>Rol en la arquitectura:</strong></p>
+    <ul>
+      <li>Configura el nombre del microservicio.</li>
+      <li>Define el puerto de ejecución.</li>
+      <li>Configura conexión a base de datos propia.</li>
+      <li>En el flujo pertenece a <strong>Infrastructure Configuration</strong>.</li>
+    </ul>
+    <div class="code">spring:
+  application:
+    name: product-service
+
+server:
+  port: 8084
+
+spring.datasource.url: jdbc:h2:mem:productsdb
+spring.jpa.hibernate.ddl-auto: update</div>
+  </div>
+
+  <div class="slide-note">
+    <strong>Idea clave:</strong> aplicar capas dentro de cada microservicio evita crear microservicios desordenados.
+    Un microservicio separado físicamente también puede convertirse en un problema si internamente mezcla controller,
+    lógica de negocio, persistencia e integración externa sin estructura.
+  </div>
+</section>
+
+<section id="rest-eventos">
+  <h2 class="section-title">12. Comunicación REST vs eventos</h2>
+  <div class="grid">
+    <div class="card half">
+      <span class="badge">REST síncrono</span>
+      <p>Se usa cuando el servicio necesita una respuesta inmediata para continuar.</p>
+      <div class="code">Order Service → Inventory Service
+Necesito saber si hay stock antes de crear el pedido.</div>
+    </div>
+    <div class="card half">
+      <span class="badge">Eventos asíncronos</span>
+      <p>Se usa cuando otros procesos pueden reaccionar después sin bloquear el flujo principal.</p>
+      <div class="code">Order Service → Kafka → Notification Service
+El pedido ya fue creado; enviar notificación puede ocurrir después.</div>
+    </div>
+  </div>
+</section>
+
+<section id="testing">
+  <h2 class="section-title">13. Testing en microservicios</h2>
+  <div class="grid">
+    <div class="card quarter"><span class="badge">Unit Testing</span><p>Valida reglas internas de cada servicio.</p></div>
+    <div class="card quarter"><span class="badge">Integration Testing</span><p>Valida base de datos, clientes REST y mensajería.</p></div>
+    <div class="card quarter"><span class="badge">Contract Testing</span><p>Valida que consumidor y proveedor respeten el contrato API.</p></div>
+    <div class="card quarter"><span class="badge">End to End</span><p>Valida el flujo completo, pero debe usarse con moderación.</p></div>
+  </div>
+</section>
+
+<section id="solid">
+  <h2 class="section-title">14. SOLID y bajo acoplamiento en microservicios</h2>
+  <div class="grid">
+    <div class="card half">
+      <span class="badge">SOLID aplicado</span>
+      <ul>
+        <li><strong>S:</strong> cada servicio tiene responsabilidad de negocio clara.</li>
+        <li><strong>O:</strong> se agregan servicios sin modificar todos los existentes.</li>
+        <li><strong>I:</strong> APIs pequeñas y específicas.</li>
+        <li><strong>D:</strong> lógica de negocio no depende directamente de infraestructura.</li>
+      </ul>
+    </div>
+    <div class="card half">
+      <span class="badge">Bajo acoplamiento</span>
+      <ul>
+        <li>No compartir base de datos entre servicios.</li>
+        <li>No duplicar lógica crítica sin control.</li>
+        <li>No acoplar servicios por clases internas.</li>
+        <li>Usar contratos API o eventos versionados.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="no-usar">
+  <h2 class="section-title">15. ¿Cuándo NO usar microservicios?</h2>
+  <div class="grid">
+    <div class="card">
+      <ul class="cons">
+        <li>Cuando el sistema es pequeño y puede resolverse con un monolito bien diseñado.</li>
+        <li>Cuando el equipo no tiene experiencia en despliegues, observabilidad, redes y automatización.</li>
+        <li>Cuando no hay necesidad real de escalar partes del sistema por separado.</li>
+        <li>Cuando no existe capacidad para administrar varios repositorios, pipelines y ambientes.</li>
+        <li>Cuando el costo operativo supera el beneficio arquitectónico.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="comparacion">
+  <h2 class="section-title">16. Comparación: Monolito vs Eventos vs Microservicios</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Criterio</th>
+          <th>Monolito</th>
+          <th>Eventos</th>
+          <th>Microservicios</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Despliegue</td><td>Único</td><td>Puede ser único o distribuido</td><td>Independiente por servicio</td></tr>
+        <tr><td>Comunicación</td><td>Métodos internos</td><td>Eventos asíncronos</td><td>REST, gRPC o eventos</td></tr>
+        <tr><td>Complejidad</td><td>Baja al inicio</td><td>Media/alta</td><td>Alta</td></tr>
+        <tr><td>Escalabilidad</td><td>Escala todo junto</td><td>Escala consumidores/productores</td><td>Escala servicio por servicio</td></tr>
+        <tr><td>Uso recomendado</td><td>Sistemas pequeños/medianos</td><td>Procesos reactivos o desacoplados</td><td>Sistemas grandes con equipos y dominios separados</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="cierre">
+  <h2 class="section-title">17. Recomendación final</h2>
+  <div class="card">
+    <p>
+      La arquitectura basada en microservicios debe entenderse como una evolución del diseño modular,
+      no como el punto de partida obligatorio. Primero se entienden responsabilidades, capas, cohesión,
+      acoplamiento y dominio. Luego se justifica la separación física en servicios independientes.
+    </p>
+    <p>
+      Un buen microservicio no es solo un proyecto separado: es una unidad de negocio autónoma,
+      con contrato claro, datos propios, despliegue independiente, pruebas, monitoreo y responsabilidad técnica definida.
+    </p>
+  </div>
+</section>
+
+</main>
+<div class="footer"></div>
+</body>
+</html>
